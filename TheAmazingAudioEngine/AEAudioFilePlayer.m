@@ -94,13 +94,17 @@ static inline BOOL _checkResult(OSStatus result, const char *operation, const ch
     [super teardown];
 }
 
+- (Float64)samplerate {
+    return _fileDescription.mSampleRate;
+}
+
 - (NSTimeInterval)duration {
     return (double)_lengthInFrames / (double)_fileDescription.mSampleRate;
 }
 
 - (NSTimeInterval)currentTime {
     AudioUnit audioUnit = self.audioUnit;
-    if ( !audioUnit || _lengthInFrames == 0 ) {
+    if ( !audioUnit || _lengthInFrames == 0 || !self.channelIsPlaying ) {
         return (double)_currentRegionOffset / (double)_fileDescription.mSampleRate;
     }
     
@@ -251,10 +255,21 @@ static void AEAudioFilePlayerNotifyCompletion(__unsafe_unretained AEAudioControl
 
 static void AEAudioFilePlayerCompletionProc(void *userData, ScheduledAudioFileRegion *fileRegion, OSStatus result) {
     __unsafe_unretained AEAudioFilePlayer *THIS = (__bridge AEAudioFilePlayer*)userData;
-    THIS->_currentRegionOffset = ((UInt32)fileRegion->mTimeStamp.mSampleTime % THIS->_lengthInFrames);
+//    THIS->_currentRegionOffset = ((UInt32)fileRegion->mTimeStamp.mSampleTime % THIS->_lengthInFrames);
     if ( THIS->_audioController && (UInt32)fileRegion->mTimeStamp.mSampleTime == THIS->_lengthInFrames ) {
         AEAudioControllerSendAsynchronousMessageToMainThread(THIS->_audioController, AEAudioFilePlayerNotifyCompletion, &THIS, sizeof(AEAudioFilePlayer*));
     }
+}
+
+UInt32 AEAudioFilePlayerGetPlaybackPositionInFrames(__unsafe_unretained AEAudioFilePlayer* filePlayer) {
+    AudioUnit audioUnit = AEAudioUnitChannelGetAudioUnit(filePlayer);
+    AudioTimeStamp timestamp;
+    UInt32 size = sizeof(timestamp);
+    OSStatus result = AudioUnitGetProperty(audioUnit, kAudioUnitProperty_CurrentPlayTime, kAudioUnitScope_Global, 0, &timestamp, &size);
+    if ( !checkResult(result, "AudioUnitGetProperty(kAudioUnitProperty_CurrentPlayTime)") ) {
+        return 0;
+    }
+    return timestamp.mSampleTime == -1 ? 0 : (filePlayer->_currentRegionOffset + (UInt32)timestamp.mSampleTime) % (UInt32)filePlayer->_lengthInFrames;
 }
 
 @end
