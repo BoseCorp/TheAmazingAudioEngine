@@ -141,6 +141,7 @@ static inline BOOL _checkResult(OSStatus result, const char *operation, const ch
     OSStatus result;
     
     // Open the file
+    self.url = url;
     result = AudioFileOpenURL((__bridge CFURLRef)url, kAudioFileReadPermission, 0, &_audioFile);
     if ( !checkResult(result, "AudioFileOpenURL") ) {
         *error = [NSError errorWithDomain:NSOSStatusErrorDomain code:result
@@ -298,6 +299,14 @@ static void AEAudioFilePlayerNotifyCompletion(__unsafe_unretained AEAudioControl
     if ( THIS.completionBlock ) {
         THIS.completionBlock();
     }
+}
+
+- (Float64)sampleRate {
+    return _fileDescription.mSampleRate;
+}
+
+int AEAudioFilePlayerGetPlayhead(AEAudioFilePlayer *filePlayer) {
+    return filePlayer->_playhead;
 }
 
 @end
