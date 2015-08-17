@@ -301,10 +301,6 @@ static void AEAudioFilePlayerNotifyCompletion(__unsafe_unretained AEAudioControl
     }
 }
 
-- (Float64)sampleRate {
-    return _fileDescription.mSampleRate;
-}
-
 int AEAudioFilePlayerGetPlayhead(AEAudioFilePlayer *filePlayer) {
     return filePlayer->_playhead;
 }
