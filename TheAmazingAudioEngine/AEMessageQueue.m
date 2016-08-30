@@ -138,7 +138,15 @@ void AEMessageQueueProcessMessagesOnRealtimeThread(__unsafe_unretained AEMessage
     }
 }
 
--(void)pollForMessageResponses {
+- (void)clearQueue {
+    [self processMessagesAndExecute:NO];
+}
+
+- (void)pollForMessageResponses {
+    [self processMessagesAndExecute:YES];
+}
+
+- (void)processMessagesAndExecute:(BOOL)executeMessages {
     pthread_t thread = pthread_self();
     BOOL isMainThread = [NSThread isMainThread];
 
@@ -188,7 +196,9 @@ void AEMessageQueueProcessMessagesOnRealtimeThread(__unsafe_unretained AEMessage
         }
         
         if ( message->responseBlock ) {
-            ((__bridge void(^)())message->responseBlock)();
+            if ( executeMessages ) {
+                ((__bridge void(^)())message->responseBlock)();
+            }
             CFBridgingRelease(message->responseBlock);
             
             _pendingResponses--;
@@ -196,8 +206,10 @@ void AEMessageQueueProcessMessagesOnRealtimeThread(__unsafe_unretained AEMessage
                 _pollThread.pollInterval = kIdleMessagingPollDuration;
             }
         } else if ( message->handler ) {
-            message->handler(message->userInfoLength > 0 ? message+1 : NULL,
-                             message->userInfoLength);
+            if ( executeMessages ) {
+                message->handler(message->userInfoLength > 0 ? message+1 : NULL,
+                                 message->userInfoLength);
+            }
         }
         
         if ( message->block ) {
