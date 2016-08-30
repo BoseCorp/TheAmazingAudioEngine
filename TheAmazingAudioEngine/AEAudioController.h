@@ -1327,6 +1327,12 @@ NSTimeInterval AEConvertFramesToSeconds(__unsafe_unretained AEAudioController *a
  */
 BOOL AECurrentThreadIsAudioThread(void);
 
+/*!
+ * Render main output into AudioBufferList.
+ * Use only while the AUGraph is not running.
+ */
+OSStatus AEAudioControllerRenderMainOutput(AEAudioController *audioController, AudioTimeStamp inTimeStamp, UInt32 inNumberFrames, AudioBufferList *ioData);
+
 ///@}
 #pragma mark - Properties
 
