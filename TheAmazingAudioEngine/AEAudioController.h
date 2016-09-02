@@ -1333,6 +1333,12 @@ BOOL AECurrentThreadIsAudioThread(void);
  */
 OSStatus AEAudioControllerRenderMainOutput(AEAudioController *audioController, AudioTimeStamp inTimeStamp, UInt32 inNumberFrames, AudioBufferList *ioData);
 
+/*!
+ * Render specified channel group output into AudioBufferList.
+ * Use only while the AUGraph is not running.
+ */
+OSStatus AEAudioControllerRenderChannelGroupOutput(AEAudioController *audioController, AEChannelGroupRef channelGroup, AudioTimeStamp inTimeStamp, UInt32 inNumberFrames, AudioBufferList *ioData);
+
 ///@}
 #pragma mark - Properties
 

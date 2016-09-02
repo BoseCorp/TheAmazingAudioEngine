@@ -4019,10 +4019,19 @@ static void handleCallbacksForChannel(AEChannelRef channel, const AudioTimeStamp
 
 OSStatus AEAudioControllerRenderMainOutput(AEAudioController *audioController, AudioTimeStamp inTimeStamp, UInt32 inNumberFrames, AudioBufferList *ioData) {
 
+    return AEAudioControllerRenderChannelGroupOutput(audioController,
+                                                     audioController->_topGroup,
+                                                     inTimeStamp,
+                                                     inNumberFrames,
+                                                     ioData);
+}
+
+OSStatus AEAudioControllerRenderChannelGroupOutput(AEAudioController *audioController, AEChannelGroupRef channelGroup, AudioTimeStamp inTimeStamp, UInt32 inNumberFrames, AudioBufferList *ioData) {
+
     AudioUnitRenderActionFlags actionFlags = kAudioOfflineUnitRenderAction_Render;
 
     channel_producer_arg_t arg = {
-        .channel = audioController->_topChannel,
+        .channel = channelGroup->channel,
         .timeStamp = inTimeStamp,
         .originalTimeStamp = inTimeStamp,
         .ioActionFlags = &actionFlags,
