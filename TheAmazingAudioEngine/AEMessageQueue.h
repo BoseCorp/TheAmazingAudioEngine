@@ -87,9 +87,9 @@ typedef void (*AEMessageQueueMessageHandler)(void *userInfo, int userInfoLength)
 - (void)stopPolling;
 
 /*!
- * Clear messages in the queue without executing their callbacks
+ * Process messages in the queue
  */
-- (void)clearQueue;
+- (void)pollForMessageResponses;
 
 /*!
  * Send a message to the realtime thread asynchronously, optionally receiving a response via a block
