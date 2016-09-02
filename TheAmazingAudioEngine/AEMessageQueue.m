@@ -138,7 +138,7 @@ void AEMessageQueueProcessMessagesOnRealtimeThread(__unsafe_unretained AEMessage
     }
 }
 
-- (void)pollForMessageResponses {
+-(void)pollForMessageResponses {
     pthread_t thread = pthread_self();
     BOOL isMainThread = [NSThread isMainThread];
 
