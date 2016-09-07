@@ -4017,6 +4017,31 @@ static void handleCallbacksForChannel(AEChannelRef channel, const AudioTimeStamp
 
 #pragma mark - Assorted helpers
 
+OSStatus AEAudioControllerRenderMainOutput(AEAudioController *audioController, AudioTimeStamp inTimeStamp, UInt32 inNumberFrames, AudioBufferList *ioData) {
+
+    return AEAudioControllerRenderChannelGroupOutput(audioController,
+                                                     audioController->_topGroup,
+                                                     inTimeStamp,
+                                                     inNumberFrames,
+                                                     ioData);
+}
+
+OSStatus AEAudioControllerRenderChannelGroupOutput(AEAudioController *audioController, AEChannelGroupRef channelGroup, AudioTimeStamp inTimeStamp, UInt32 inNumberFrames, AudioBufferList *ioData) {
+
+    AudioUnitRenderActionFlags actionFlags = kAudioOfflineUnitRenderAction_Render;
+
+    channel_producer_arg_t arg = {
+        .channel = channelGroup->channel,
+        .timeStamp = inTimeStamp,
+        .originalTimeStamp = inTimeStamp,
+        .ioActionFlags = &actionFlags,
+        .nextFilterIndex = 0
+    };
+    OSStatus result = channelAudioProducer((void*)&arg, ioData, &inNumberFrames);
+    handleCallbacksForChannel(arg.channel, &inTimeStamp, inNumberFrames, ioData);
+    return result;
+}
+
 static void performLevelMonitoring(audio_level_monitor_t* monitor, AudioBufferList *buffer, UInt32 numberFrames) {
     if ( !monitor->floatConverter || !monitor->scratchBuffer ) return;
     
